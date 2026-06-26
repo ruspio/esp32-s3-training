@@ -1,0 +1,111 @@
+# ============================================================
+# ESP32-S3 Training - Git Ignore
+# Root repository for multiple ESP-IDF exercises and projects
+# ============================================================
+
+
+# ------------------------------------------------------------
+# ESP-IDF build output
+# Applies to:
+# exercises/01_freertos_tasks/build/
+# exercises/02_freertos_queue/build/
+# projects/spotify_display/build/
+# etc.
+# ------------------------------------------------------------
+
+**/build/
+
+
+# ------------------------------------------------------------
+# ESP-IDF generated / temporary config files
+# Keep sdkconfig committed, but ignore old/generated backups.
+# ------------------------------------------------------------
+
+**/sdkconfig.old
+**/sdkconfig.old.*
+
+
+# ------------------------------------------------------------
+# ESP-IDF managed components
+# Usually regenerated from idf_component.yml / dependencies.lock.
+# If later you decide to vendor dependencies, remove this rule.
+# ------------------------------------------------------------
+
+**/managed_components/
+
+
+# ------------------------------------------------------------
+# CMake temporary files
+# Mostly covered by build/, but useful as extra protection.
+# ------------------------------------------------------------
+
+**/CMakeFiles/
+**/CMakeCache.txt
+**/cmake_install.cmake
+**/compile_commands.json
+
+
+# ------------------------------------------------------------
+# VS Code / ESP-IDF Extension local settings
+# These often contain machine-specific paths.
+# ------------------------------------------------------------
+
+.vscode/
+**/.vscode/
+
+
+# ------------------------------------------------------------
+# Python temporary files
+# ESP-IDF tooling uses Python heavily.
+# ------------------------------------------------------------
+
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+.venv/
+venv/
+env/
+
+
+# ------------------------------------------------------------
+# Operating system files
+# ------------------------------------------------------------
+
+.DS_Store
+Thumbs.db
+
+
+# ------------------------------------------------------------
+# Logs and temporary files
+# ------------------------------------------------------------
+
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+
+
+# ------------------------------------------------------------
+# Local secrets / credentials
+# Important for future Wi-Fi and Spotify API work.
+# Do not commit passwords, tokens, client secrets, etc.
+# ------------------------------------------------------------
+
+**/secrets.h
+**/credentials.h
+**/wifi_credentials.h
+**/spotify_credentials.h
+**/local_config.h
+
+**/secrets.cpp
+**/credentials.cpp
+**/wifi_credentials.cpp
+**/spotify_credentials.cpp
+**/local_config.cpp
+
+**/.env
+**/.env.*
