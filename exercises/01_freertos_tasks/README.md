@@ -2,19 +2,31 @@
 
 ## Goal
 
-The goal of this exercise is to understand the basics of FreeRTOS tasks on ESP32-S3.
+The goal of this exercise is to understand the basics of FreeRTOS tasks on ESP32-S3 using ESP-IDF.
 
 This exercise focuses on:
 
 * creating FreeRTOS tasks
 * using `vTaskDelay()`
 * observing how tasks are scheduled
-* understanding the difference between blocking one task and blocking the whole CPU
+* understanding that delaying one task does not block the whole CPU
 * observing how two independent tasks can run with different timing
 
-## Concepts Practiced
+## What This Exercise Does
 
-Main concepts:
+This exercise creates two FreeRTOS tasks.
+
+The first task logs a message every 500 ms.
+
+The second task logs a message every 1200 ms.
+
+Both tasks run independently and use `vTaskDelay()` to block themselves for a defined amount of time.
+
+The purpose is to observe that when one task is blocked, the scheduler can run another task.
+
+## Tested Concepts
+
+This exercise introduces the following concepts:
 
 * `app_main()`
 * task function
@@ -25,18 +37,25 @@ Main concepts:
 * `vTaskDelay()`
 * `pdMS_TO_TICKS()`
 * task states: Running, Ready, Blocked
+* checking the return value of `xTaskCreate()`
 
-## What Was Tested
+## Expected Output
 
-Two FreeRTOS tasks were created.
+The monitor should show two different log messages appearing repeatedly.
 
-The first task logs a message every 500 ms.
+Example:
 
-The second task logs a message every 1200 ms.
+```text
+I (xxx) 01_freertos_tasks: Test LOG 1
+I (xxx) 01_freertos_tasks: Test LOG 2
+I (xxx) 01_freertos_tasks: Test LOG 1
+I (xxx) 01_freertos_tasks: Test LOG 1
+I (xxx) 01_freertos_tasks: Test LOG 2
+```
 
-The purpose was to observe that when one task is blocked by `vTaskDelay()`, another task can still run.
+The first task should appear more often because it uses a shorter delay.
 
-## Main Observation
+## Observations
 
 `vTaskDelay()` blocks only the currently running task.
 
@@ -44,89 +63,37 @@ It does not stop the whole ESP32.
 
 When a task calls `vTaskDelay()`, it enters the Blocked state. During that time, the FreeRTOS scheduler may run other tasks that are ready to execute.
 
-## Important Notes
+The task resumes from the instruction after `vTaskDelay()`.
 
-`vTaskDelay()` does not take milliseconds directly.
+Changing task priority may not visibly change the terminal output in this simple exercise. This is expected because both tasks spend most of their time blocked.
 
-It takes FreeRTOS ticks.
+Task priority matters mainly when multiple tasks are ready to run at the same time.
 
-The recommended way to write delays is:
+## Implementation Notes
+
+The return value of each `xTaskCreate()` call is checked against `pdPASS`.
+
+If task creation fails, an error is logged and `app_main()` returns.
+
+This makes task creation failures visible during testing.
+
+The delay time is converted from milliseconds to FreeRTOS ticks using:
 
 ```text
 pdMS_TO_TICKS(milliseconds)
 ```
 
-This makes the code easier to read and independent of the configured tick period.
+This is preferred over manual tick conversion because it is more readable and independent of the configured tick period.
 
-## Task Timing
+## Conclusions
 
-If a task does this:
-
-```text
-log message
-delay 500 ms
-log message
-delay 500 ms
-```
-
-then the logs appear alternately after each delay.
-
-The task resumes from the instruction after `vTaskDelay()`.
-
-## Priority Observation
-
-Changing task priority may not visibly change the terminal output in this simple exercise.
-
-This is expected.
-
-Task priority matters mainly when multiple tasks are ready to run at the same time.
-
-In this exercise, both tasks spend most of their time blocked in `vTaskDelay()`, so there is very little real CPU competition.
-
-## Task Creation Result
-
-The return value of `xTaskCreate()` should be checked.
-
-If the task is created successfully, `xTaskCreate()` returns `pdPASS`.
-
-If task creation fails, the task will not run. A common reason is not enough available memory for the task control block or task stack.
-
-In this exercise, the result of each `xTaskCreate()` call is checked and an error is logged if task creation fails.
-
-This is a good habit in embedded programming because failures may otherwise be difficult to diagnose.
-
-## ESP-IDF Scheduler Note
-
-In a typical standalone FreeRTOS application, the user may need to call `vTaskStartScheduler()` manually.
-
-In ESP-IDF, this is not required.
-
-ESP-IDF starts the FreeRTOS scheduler before calling `app_main()`.
-
-This means that `app_main()` already runs inside a FreeRTOS task. Tasks created inside `app_main()` can continue running even after `app_main()` returns.
-
-## Stack Size Note
-
-In ESP-IDF, the stack size argument passed to `xTaskCreate()` is specified in bytes.
-
-For example:
-
-```text
-2048
-```
-
-means a task stack size of 2048 bytes.
-
-This is important because classic FreeRTOS documentation may describe stack size in words, while ESP-IDF uses bytes.
-
-## Key Conclusions
-
-* A FreeRTOS task is an independent execution context.
+* A FreeRTOS task is an independent execution context managed by the scheduler.
 * `vTaskDelay()` blocks the current task, not the whole CPU.
-* While one task is blocked, other tasks may run.
-* Shorter delay means the task wakes up more often.
-* Higher priority does not mean the task runs more frequently.
+* While one task is blocked, other ready tasks may run.
+* A shorter delay means that a task wakes up more often.
+* Higher priority does not mean that a task runs more frequently.
 * Priority decides which ready task should run first when there is competition for CPU time.
+* `xTaskCreate()` should be checked to detect task creation failures.
 * `app_main()` may finish after creating tasks. The created tasks continue running.
 
 ## Questions to Answer
@@ -139,6 +106,15 @@ After completing this exercise, it should be possible to answer:
 * Why can another task run while the first task is delayed?
 * What is the difference between delay time and task priority?
 * Why is `pdMS_TO_TICKS()` preferred over manual tick conversion?
+* Why should the return value of `xTaskCreate()` be checked?
+
+## Related Notes
+
+General FreeRTOS notes are available in:
+
+```text
+../../notes/freertos.md
+```
 
 ## Next Step
 
