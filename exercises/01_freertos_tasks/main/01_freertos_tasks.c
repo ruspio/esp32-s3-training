@@ -1,5 +1,3 @@
-#include <stdio.h>
-#include <string.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_log.h"
@@ -21,6 +19,16 @@ void second_task(void *pvParameters) {
 }
 
 void app_main(void) {
-    xTaskCreate(first_task, "1st Task", 2048, NULL, 5, NULL);
-    xTaskCreate(second_task, "2nd Task", 2048, NULL, 4, NULL);
+    BaseType_t first_taskResult = xTaskCreate(first_task, "1st Task", 2048, NULL, 5, NULL);
+    if (first_taskResult != pdPASS) {
+        ESP_LOGE(TAG, "Failed to create first_task!");
+        return;
+    }
+    
+    BaseType_t second_taskResult = xTaskCreate(second_task, "2nd Task", 2048, NULL, 4, NULL);
+    if (second_taskResult != pdPASS) {
+        ESP_LOGE(TAG, "Failed to create second_task!");
+        return;
+    }
+
 }

@@ -32,7 +32,7 @@ Two FreeRTOS tasks were created.
 
 The first task logs a message every 500 ms.
 
-The second task logs a message every 1500 ms.
+The second task logs a message every 1200 ms.
 
 The purpose was to observe that when one task is blocked by `vTaskDelay()`, another task can still run.
 
@@ -82,6 +82,42 @@ This is expected.
 Task priority matters mainly when multiple tasks are ready to run at the same time.
 
 In this exercise, both tasks spend most of their time blocked in `vTaskDelay()`, so there is very little real CPU competition.
+
+## Task Creation Result
+
+The return value of `xTaskCreate()` should be checked.
+
+If the task is created successfully, `xTaskCreate()` returns `pdPASS`.
+
+If task creation fails, the task will not run. A common reason is not enough available memory for the task control block or task stack.
+
+In this exercise, the result of each `xTaskCreate()` call is checked and an error is logged if task creation fails.
+
+This is a good habit in embedded programming because failures may otherwise be difficult to diagnose.
+
+## ESP-IDF Scheduler Note
+
+In a typical standalone FreeRTOS application, the user may need to call `vTaskStartScheduler()` manually.
+
+In ESP-IDF, this is not required.
+
+ESP-IDF starts the FreeRTOS scheduler before calling `app_main()`.
+
+This means that `app_main()` already runs inside a FreeRTOS task. Tasks created inside `app_main()` can continue running even after `app_main()` returns.
+
+## Stack Size Note
+
+In ESP-IDF, the stack size argument passed to `xTaskCreate()` is specified in bytes.
+
+For example:
+
+```text
+2048
+```
+
+means a task stack size of 2048 bytes.
+
+This is important because classic FreeRTOS documentation may describe stack size in words, while ESP-IDF uses bytes.
 
 ## Key Conclusions
 
